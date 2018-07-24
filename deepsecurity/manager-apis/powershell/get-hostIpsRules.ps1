@@ -29,7 +29,6 @@ $timestamp = Get-Date -Format yyyyMMddhhmmss
 $filename = "ipsrules$($timestamp).csv"
 
 $hts = $DSM.hostRetrieveAll($SID);
-$csvline = New-Object PSObject;
 
 foreach ($ht in $hts)
     {
@@ -48,15 +47,18 @@ foreach ($ht in $hts)
         
         foreach ($ipsrule in $hostPolicy.DPIRuleIDs)
             {
+                $rule = $DSM.DPIRuleRetrieve($ipsrule, $SID); 
+
+                $csvline = New-Object PSObject
+                $csvline | Add-Member -MemberType NoteProperty -Name DisplayName -Value $ht.DisplayName  
+                $csvline | Add-Member -MemberType NoteProperty -Name HostName -Value $ht.name  
+                $csvline | Add-Member -MemberType NoteProperty -Name IP -Value $hostdetail.lastIPUsed
+                $csvline | Add-Member -MemberType NoteProperty -Name DpiRuleId -Value $rule.identifier
+                $csvline | Add-Member -MemberType NoteProperty -Name DpiRuleCveNumbers -Value $rule.cvenumbers
+                $csvline | Add-Member -MemberType NoteProperty -Name DpiRuleDescription -Value $rule.descriptio
+                $csvline | Export-Csv $PSScriptRoot\$filename -Append -NoTypeInformation -NoClobber
                 $csvline = $null
-                $rule = $DSM.DPIRuleRetrieve($ipsrule, $SID);
-                $csvline | Add-Member -MemberType NoteProperty -Name DisplayName -Value $ht.DisplayName;  
-                $csvline | Add-Member -MemberType NoteProperty -Name HostName -Value $ht.name;  
-                $csvline | Add-Member -MemberType NoteProperty -Name IP -Value $hostdetail.lastIPUsed;
-                $csvline | Add-Member -MemberType NoteProperty -Name DpiRuleId -Value $rule.identifier;
-                $csvline | Add-Member -MemberType NoteProperty -Name DpiRuleCveNumbers -Value $rule.cvenumbers;
-                $csvline | Add-Member -MemberType NoteProperty -Name DpiRuleDescription -Value $rule.description;
-                $csvline | export-csv $filename -Append -NoTypeInformation -NoClobber
+				
             }
 
     }
