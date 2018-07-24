@@ -16,9 +16,11 @@ $Global:DSM = New-Object DSSOAP.ManagerService
 try {
     if (!$tenant) {
         $Global:SID = $DSM.authenticate($user, $password)
+		echo "Successfully authenticated as $user on $manager!"
         }
     else {
         $Global:SID = $DSM.authenticateTenant($tenant, $user, $password)
+		echo "Successfully authenticated as $user on $manager!"
         }
 }
 catch {
