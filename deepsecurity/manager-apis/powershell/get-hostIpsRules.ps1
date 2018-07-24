@@ -4,14 +4,15 @@ param (
     [Parameter(Mandatory=$true)][string]$user,
     [Parameter(Mandatory=$false)][string]$tenant
 )
-$port = "4119"
+$authport = "4119"
 $passwordinput = Read-host "Password for Deep Security Manager" -AsSecureString
 $password = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($passwordinput))
 
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback={$true}
 [Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::Tls12
-$Global:DSMSoapService = New-WebServiceProxy -uri "https://$manager`:`$port/webservice/Manager?WSDL" -Namespace "DSSOAP" -ErrorAction Stop
+$Global:DSMSoapService = New-WebServiceProxy -uri "https://$manager`:$authport/webservice/Manager?WSDL" -Namespace "DSSOAP" -ErrorAction Stop
 $Global:DSM = New-Object DSSOAP.ManagerService
+
 try {
     if (!$tenant) {
         $Global:SID = $DSM.authenticate($user, $password)
